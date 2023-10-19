@@ -1,2 +1,9 @@
+certifi==2023.7.22
+charset-normalizer==3.3.0
+idna==3.4
+libsonyapi==1.0
+numpy==1.26.0
 opencv-python==4.8.1.78
 Pillow==10.0.1
+requests==2.31.0
+urllib3==2.0.7
