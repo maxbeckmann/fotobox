@@ -46,8 +46,7 @@ def button_click():
         else:
             success = take_picture()
             if success:
-                remark = random.choice(negative_remarks)
-                countdown_label.config(text=remark)
+                countdown_label.pack_forget()
             else:
                 root.after(500, show_start_screen)
     
