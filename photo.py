@@ -3,6 +3,7 @@ import cv2
 import time
 from PIL import Image, ImageTk
 import random
+from sony import CameraHandler
 
 negative_remarks = [
     "Das ist schrecklich!",
@@ -43,43 +44,31 @@ def button_click():
             countdown_label.config(text=str(count))
             root.after(1000, countdown, count - 1)  # Update countdown every 1000 ms (1 second)
         else:
-            remark = random.choice(negative_remarks)
-            countdown_label.config(text=remark)
-            capture_screenshot()
+            success = take_picture()
+            if success:
+                remark = random.choice(negative_remarks)
+                countdown_label.config(text=remark)
+            else:
+                root.after(500, show_start_screen)
     
     # Start the countdown from 3 seconds
     countdown(3)
 
-def capture_screenshot():
-    # Initialize webcam capture
-    cap = cv2.VideoCapture(0)
-    
-    # Check if the webcam is opened successfully
-    if not cap.isOpened():
-        print("Error: Could not access the webcam.")
-        return
-    
-    # Read a frame from the webcam
-    for i in range(0, 10):
-        ret, frame = cap.read()
-    
-    # Release the webcam
-    cap.release()
-    
-    # Check if the frame was captured successfully
-    if ret:
-        # Save the captured frame as an image file
-        timestamp = int(time.time())
-        filename = f"img/screenshot_{timestamp}.png"
-        cv2.imwrite(filename, frame)
-        print(f"Screenshot saved as {filename}")
-        display_image(filename)
-    else:
-        print("Error: Could not capture a frame from the webcam.")
+def take_picture():
+    c = CameraHandler()
+    img = c.get_one_picture()
+    if img:
+        display_image(img)
+        return True
+    return False
 
-def display_image(filename):
+def display_image(image):
+    aspect_ratio = 4/3
+    width = 1200
+    height = int(width / aspect_ratio)
+    maxsize = (width, height)
+    image.thumbnail(maxsize)
     # Load the captured image using Pillow (PIL)
-    image = Image.open(filename)
     photo = ImageTk.PhotoImage(image)
     
     # Create a label to display the image
@@ -92,7 +81,7 @@ def display_image(filename):
 
 def show_start_screen():
     countdown_label.pack_forget()
-    text_label.pack(pady=20)
+    text_label.pack(pady=10)
     button.pack()
     
     button.place(relx=0.5, rely=0.5, anchor=tk.CENTER)
@@ -109,7 +98,7 @@ root = tk.Tk()
 root.attributes('-fullscreen', True)
 
 text_label = tk.Label(root, text="Fotobox bereit", font=("Helvetica", 24))
-text_label.pack(pady=20)
+text_label.pack(pady=10)
 
 button = tk.Button(root, text="Gib Foto!", command=button_click, font=("Helvetica", 32))
 button.pack()
